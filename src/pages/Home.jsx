@@ -47,7 +47,7 @@ export default function Home() {
 
       {/* Total workouts */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-4 flex items-center gap-4">
-        <div className="text-4xl font-bold text-emerald-400 tabular-nums leading-none">{totalWorkouts}</div>
+        <div className="text-4xl font-bold text-emerald-400 tabular-nums leading-none">{loading ? '…' : totalWorkouts}</div>
         <div>
           <div className="text-zinc-200 font-medium">workout{totalWorkouts !== 1 ? 's' : ''} logged</div>
           <div className="text-zinc-500 text-sm">

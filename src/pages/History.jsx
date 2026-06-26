@@ -5,7 +5,7 @@ import { formatDate, computeStreak, computeLongestStreak } from '../utils/helper
 import StreakCalendar from '../components/StreakCalendar'
 
 export default function History() {
-  const { sessions } = useData()
+  const { sessions, loading } = useData()
   const [expanded, setExpanded] = useState(null)
 
   const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date))
@@ -23,15 +23,15 @@ export default function History() {
       {/* Streak stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-emerald-400">{streak}</div>
+          <div className="text-2xl font-bold text-emerald-400">{loading ? '…' : streak}</div>
           <div className="text-zinc-500 text-xs mt-0.5">streak</div>
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-zinc-100">{longest}</div>
+          <div className="text-2xl font-bold text-zinc-100">{loading ? '…' : longest}</div>
           <div className="text-zinc-500 text-xs mt-0.5">best streak</div>
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-zinc-100">{sessions.length}</div>
+          <div className="text-2xl font-bold text-zinc-100">{loading ? '…' : sessions.length}</div>
           <div className="text-zinc-500 text-xs mt-0.5">total</div>
         </div>
       </div>
@@ -45,13 +45,26 @@ export default function History() {
       )}
 
       {/* Session list */}
-      {sorted.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col gap-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-4 animate-pulse">
+              <div className="h-3.5 bg-zinc-800 rounded w-2/5 mb-2" />
+              <div className="h-2.5 bg-zinc-800 rounded w-1/4" />
+            </div>
+          ))}
+        </div>
+      ) : sorted.length === 0 ? (
         <p className="text-zinc-600 text-sm text-center mt-8">No sessions logged yet.</p>
       ) : (
         <div className="flex flex-col gap-2">
           {sorted.map((s) => {
             const isOpen = expanded === s.id
-            const dayLabel = s.day ? `Day ${s.day} — ${WORKOUT_DAYS[s.day]?.name}` : 'Micro session'
+            const dayLabel = s.day
+              ? `Day ${s.day} — ${WORKOUT_DAYS[s.day]?.name}`
+              : s.label === 'Custom'
+              ? 'Custom session'
+              : 'Micro session'
             return (
               <div key={s.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                 <button
