@@ -1,15 +1,17 @@
-const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const WEEKS = 13
+
+function localDateStr(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 
 export default function StreakCalendar({ logEntries }) {
   const activeDays = new Set(logEntries.map((e) => e.date))
 
-  // Build grid: 13 weeks × 7 days, ending today
   const cells = []
   const end = new Date()
-  end.setHours(0, 0, 0, 0)
-  // Align end to Sunday
-  const endDay = end.getDay() // 0=Sun
   const totalDays = WEEKS * 7
   const start = new Date(end)
   start.setDate(end.getDate() - (totalDays - 1))
@@ -17,7 +19,7 @@ export default function StreakCalendar({ logEntries }) {
   for (let i = 0; i < totalDays; i++) {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
-    const key = d.toISOString().slice(0, 10)
+    const key = localDateStr(d)
     const isFuture = d > end
     cells.push({ key, active: activeDays.has(key), future: isFuture })
   }

@@ -1,5 +1,14 @@
+// Use local date parts everywhere — toISOString() returns UTC which breaks
+// timezones ahead of UTC (e.g. IST = UTC+5:30, midnight local = yesterday UTC)
+function localDateStr(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 export function today() {
-  return new Date().toISOString().slice(0, 10)
+  return localDateStr(new Date())
 }
 
 export function formatDate(dateStr) {
@@ -10,15 +19,11 @@ export function formatDate(dateStr) {
 export function parseReps(repsStr) {
   if (!repsStr) return null
   const s = String(repsStr).trim()
-  // time-based like "45s"
   if (/^\d+s$/.test(s)) return null
-  // "10 each" → 20
   const eachMatch = s.match(/^(\d+)\s*each/i)
   if (eachMatch) return parseInt(eachMatch[1]) * 2
-  // "10–15" or "10-15" → average
   const rangeMatch = s.match(/^(\d+)[–\-](\d+)$/)
   if (rangeMatch) return (parseInt(rangeMatch[1]) + parseInt(rangeMatch[2])) / 2
-  // plain number
   const numMatch = s.match(/^(\d+)/)
   if (numMatch) return parseInt(numMatch[1])
   return null
@@ -32,7 +37,6 @@ export function calcVolume(sets, reps, weight) {
 
 export function getWeekBounds() {
   const d = new Date()
-  d.setHours(0, 0, 0, 0)
   const day = d.getDay()
   const diff = day === 0 ? -6 : 1 - day
   const mon = new Date(d)
@@ -40,8 +44,8 @@ export function getWeekBounds() {
   const sun = new Date(mon)
   sun.setDate(mon.getDate() + 6)
   return {
-    start: mon.toISOString().slice(0, 10),
-    end: sun.toISOString().slice(0, 10),
+    start: localDateStr(mon),
+    end: localDateStr(sun),
   }
 }
 
@@ -50,11 +54,10 @@ export function computeStreak(logEntries) {
   const days = new Set(logEntries.map((e) => e.date))
   let streak = 0
   const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  const todayStr = d.toISOString().slice(0, 10)
+  const todayStr = localDateStr(d)
   if (!days.has(todayStr)) d.setDate(d.getDate() - 1)
   while (true) {
-    const s = d.toISOString().slice(0, 10)
+    const s = localDateStr(d)
     if (!days.has(s)) break
     streak++
     d.setDate(d.getDate() - 1)
