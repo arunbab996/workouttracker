@@ -5,7 +5,7 @@ import { getWeekBounds, today } from '../utils/helpers'
 import { MOTIVATIONAL_LINES, WORKOUT_DAYS } from '../data/workouts'
 
 export default function Home() {
-  const { sessions, weights, aiNote } = useData()
+  const { sessions, weights, aiNote, loading } = useData()
   const [quoteIdx, setQuoteIdx] = useState(() => Math.floor(Math.random() * MOTIVATIONAL_LINES.length))
   const navigate = useNavigate()
 
@@ -27,6 +27,7 @@ export default function Home() {
   const weekCount = thisWeek.length
 
   const latestWeight = weights.length ? [...weights].sort((a, b) => b.date.localeCompare(a.date))[0] : null
+  const weightThisWeek = weights.some((w) => w.date >= start && w.date <= end)
 
   const totalWeeks = sessions.length
     ? Math.ceil((new Date(todayStr) - new Date(sessions.slice().sort((a, b) => a.date.localeCompare(b.date))[0].date)) / 604800000)
@@ -124,11 +125,29 @@ export default function Home() {
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
           <div className="text-xl font-bold text-zinc-100">
-            {latestWeight ? latestWeight.value : '–'}
+            {loading ? '…' : latestWeight ? Number(latestWeight.value) : '–'}
           </div>
           <div className="text-zinc-500 text-xs mt-0.5">kg bodyweight</div>
         </div>
       </div>
+
+      {/* Weekly weight prompt */}
+      {!loading && !weightThisWeek && (
+        <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 mb-4 flex items-center justify-between gap-3">
+          <div>
+            <div className="text-zinc-200 text-sm font-medium">Log your weight this week</div>
+            <div className="text-zinc-500 text-xs mt-0.5">
+              {latestWeight ? `Last logged: ${Number(latestWeight.value)} kg` : 'No weight logged yet'}
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/weight')}
+            className="shrink-0 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+          >
+            Log now →
+          </button>
+        </div>
+      )}
 
       {/* AI note */}
       {aiNote && (
