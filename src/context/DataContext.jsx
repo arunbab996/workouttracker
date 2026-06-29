@@ -60,6 +60,12 @@ export function DataProvider({ children }) {
     return data
   }
 
+  async function deleteSession(id) {
+    const { error } = await supabase.from('sessions').delete().eq('id', id)
+    if (error) throw error
+    setSessions((prev) => prev.filter((s) => s.id !== id))
+  }
+
   async function saveAiNote(note) {
     const { data, error } = await supabase
       .from('ai_notes')
@@ -72,7 +78,7 @@ export function DataProvider({ children }) {
   }
 
   return (
-    <DataContext.Provider value={{ sessions, weights, aiNote, loading, error, addSession, addWeight, saveAiNote }}>
+    <DataContext.Provider value={{ sessions, weights, aiNote, loading, error, addSession, addWeight, saveAiNote, deleteSession }}>
       {children}
     </DataContext.Provider>
   )
